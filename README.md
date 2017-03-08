@@ -1,2 +1,2 @@
 # shoutbot
-A bot for making regular announcements
+A bot for making regular announcements.

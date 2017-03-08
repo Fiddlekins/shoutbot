@@ -1,0 +1,19 @@
+{
+  "name": "shoutbot",
+  "version": "1.0.0",
+  "description": "A discord bot for yelling periodically",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fiddlekins/shoutbot.git"
+  },
+  "author": "Fiddlekins",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fiddlekins/shoutbot/issues"
+  },
+  "homepage": "https://github.com/Fiddlekins/shoutbot#readme"
+}
