@@ -7,6 +7,7 @@ const Discord = require('discord.js');
 const TOKEN = fs.readFileSync('./token', 'utf8').trim(); // Trim because linux
 
 const TICK_TIME = 1000;
+const SAVE_PATH = 'SHOUTS.json';
 
 class Shoutbot {
 	constructor(token) {
@@ -16,6 +17,8 @@ class Shoutbot {
 		this._boundTick = this._tick.bind(this);
 
 		this._shouts = {};
+
+		this._loadShouts();
 
 		this.client.on('ready', this._onReady.bind(this));
 
@@ -62,8 +65,10 @@ class Shoutbot {
 					message.reply('Shout has been unset.');
 				} else {
 					message.reply('Could not find that shout to unset.');
+					return;
 				}
 			}
+			this._saveShouts();
 		}
 	}
 
@@ -75,7 +80,6 @@ class Shoutbot {
 		let time = 0;
 		let matches = timeString.match(/([0-9\.]+)[A-z]/g);
 		if (matches) {
-
 			for (let match of matches) {
 				let unit = /[A-z]/.exec(match)[0];
 				let value = parseFloat(/[0-9\.]+/.exec(match)[0]);
@@ -124,6 +128,18 @@ class Shoutbot {
 
 	_shout(channelId, shoutMessage) {
 		this.client.channels.get(channelId).sendMessage(shoutMessage);
+	}
+
+	_saveShouts() {
+		fs.writeFileSync(SAVE_PATH, JSON.stringify(this._shouts, null, '\t'), 'utf8');
+	}
+
+	_loadShouts() {
+		try {
+			this._shouts = JSON.parse(fs.readFileSync(SAVE_PATH, 'utf8'));
+		} catch (err) {
+			// lol don't care
+		}
 	}
 }
 
