@@ -33,20 +33,29 @@ class Shoutbot {
 		if (message.content.charAt(0) === this.commandCharacter) {
 			if (!message.guild) {
 				message.reply('This bot is only configured to work in a guild channel.');
+				return;
+			}
+			if (!Shoutbot._checkAuthorisation(message.member)) {
+				message.reply('You do not have authorisation.');
+				return;
 			}
 			if (message.content.slice(1, 4) === 'set') {
 				let command = message.content.slice(5);
 				let splitIndex = command.indexOf(';');
+				if (splitIndex === -1) {
+					message.reply('Please give a valid command.');
+					return;
+				}
 				let time = Shoutbot._parseTime(command.slice(0, splitIndex));
 				let shoutMessage = command.slice(splitIndex + 1);
 				if (isNaN(time)) {
 					message.reply('Please specify a valid time interval.');
+					return;
 				}
 				this._shouts[message.channel.id] = this._shouts[message.channel.id] || {};
 				this._shouts[message.channel.id][shoutMessage] = { time: time, nextShoutTimestamp: Date.now() + time };
 				message.reply('Shout has been set.');
-			}
-			if (message.content.slice(1, 6) === 'unset') {
+			} else if (message.content.slice(1, 6) === 'unset') {
 				let shoutMessage = message.content.slice(7);
 				if (this._shouts[message.channel.id] && this._shouts[message.channel.id][shoutMessage]) {
 					delete this._shouts[message.channel.id][shoutMessage];
@@ -58,27 +67,34 @@ class Shoutbot {
 		}
 	}
 
+	static _checkAuthorisation(member) {
+		return member.hasPermission('ADMINISTRATOR');
+	}
+
 	static _parseTime(timeString) {
 		let time = 0;
 		let matches = timeString.match(/([0-9\.]+)[A-z]/g);
-		for (let match of matches) {
-			let unit = /[A-z]/.exec(match)[0];
-			let value = parseFloat(/[0-9\.]+/.exec(match)[0]);
-			switch (unit) {
-				case 'd':
-					time += value * 24 * 60 * 60 * 1000;
-					break;
-				case 'h':
-					time += value * 60 * 60 * 1000;
-					break;
-				case 'm':
-					time += value * 60 * 1000;
-					break;
-				case 's':
-					time += value * 1000;
-					break;
-				default:
-					return NaN;
+		if (matches) {
+
+			for (let match of matches) {
+				let unit = /[A-z]/.exec(match)[0];
+				let value = parseFloat(/[0-9\.]+/.exec(match)[0]);
+				switch (unit) {
+					case 'd':
+						time += value * 24 * 60 * 60 * 1000;
+						break;
+					case 'h':
+						time += value * 60 * 60 * 1000;
+						break;
+					case 'm':
+						time += value * 60 * 1000;
+						break;
+					case 's':
+						time += value * 1000;
+						break;
+					default:
+						return NaN;
+				}
 			}
 		}
 		return time || NaN;
